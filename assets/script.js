@@ -2,9 +2,16 @@
 var currentDay = $("#currentDay");
 var dayPlanner = $(".planner");
 var timeRow = $(".time-row");
-var currentDate = dayjs().format("dddd, MMMM D, YYYY h:mm A");
 var currentHour = dayjs().format("H");
 var planItems = [];
 
 //Updates Current Date on Page using Dayjs
-currentDay.text(currentDate);
+
+function updateTime() {
+    var now = dayjs().format("dddd, MMMM D, YYYY [at] hh:mm:ss A");
+    currentDay.html(now);
+};
+
+setInterval(updateTime, 1000);
+
+
