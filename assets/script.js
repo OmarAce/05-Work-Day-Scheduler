@@ -1,7 +1,7 @@
 // Variable Definitions
+
 var currentDay = $("#currentDay");
 var dayPlanner = $(".planner");
-var timeRow = $(".time-row");
 var currentHour = dayjs().format("H");
 var toDoItems = [];
 
@@ -17,6 +17,7 @@ setInterval(updateTime, 1000);
 // Dynamically Renders Planner 
 
 function render() {
+
     for (var i = 9; i < 18; i++) {
       $(dayPlanner).append(`
       <div class="time-row row" data-hour=${i}>
@@ -38,25 +39,68 @@ function render() {
 
 render();
 
-function getTodos(){
-    toDoItems = JSON.parse(localStorage.getItem("toDos"));
-    console.log(toDoItems);
-}
+function startSchedule(){
 
-getTodos();
+$('.time-row').each(function(){
+  var thisRow = $(this);
+  var thisRowHr = Number((thisRow.attr("data-hour")));
+
+  var todoObj = {
+    hour: thisRowHr,
+    text: "",
+  }
+  console.log(todoObj);
+  toDoItems.push(todoObj);
+});
+
+// Loop all rows, save to the local storage
+localStorage.setItem("toDos", JSON.stringify(toDoItems)); 
+};
 
 function saveTodo(){
     var currentRow = parseInt($(this).parent().attr("data-hour")); //Target Curent Row Hour ID Make Integer
     var taskUpdate = (($(this).parent()).children("textarea")).val(); //Target Text Area
-        toDoItems = {
-        hour: currentRow,
-        text: taskUpdate,
-        }
+    for (var i = 0; i < toDoItems.length; i++){
+      if (toDoItems[i].hour == currentRow){
+       
+        toDoItems[i].text = taskUpdate;
+      }
+    }
     localStorage.setItem("toDos", JSON.stringify(toDoItems));
     console.log(currentRow);
     console.log(taskUpdate);
-    getTodos();
+    // getTodos();
+    renderSchedule();
 
 }
+
+function renderSchedule(){
+  
+  toDoItems = localStorage.getItem("todos");
+  toDoItems = JSON.parse(toDoItems);
+    
+  for (var i = 0; i < toDoItems.length; i++){
+    var itemHour = toDoItems[i].hour;
+    var itemText = toDoItems[i].text; 
+   
+    $("[data-hour=" + itemHour + "]").children("textarea").val(itemText);
+  }
+}
+
+$(document).ready(function(){
+
+if(!localStorage.getItem("toDos")){
+  //initialize the array of objects
+  startSchedule();
+}
+});
+
+$(document).ready(function(){
+
+  if(!localStorage.getItem("toDos")){
+    //initialize the array of objects
+    startSchedule();
+  }
+  });
 
 dayPlanner.on("click", "button", saveTodo);
