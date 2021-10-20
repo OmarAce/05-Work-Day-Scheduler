@@ -25,7 +25,7 @@ function render() {
         }</div>
         <textarea
         class="col -8 col-lg-10 description ${
-          i < currentHour ? "past" : i === currentHour ? "present" : "future"
+          i < currentHour ? "past" : i == currentHour ? "present" : "future"
         }"
         >${toDoItems[i] || ""}</textarea
         ><button class="col-2 col-lg-1 btn btn-block d-flex justify-content-center align-items-center saveBtn" id="${i}">
