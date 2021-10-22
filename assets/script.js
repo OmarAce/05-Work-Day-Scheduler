@@ -1,7 +1,7 @@
-// Variable Definitions
 
 var currentDay = $("#currentDay");
 var dayPlanner = $(".planner");
+var timeRow = $(".time-row");
 var currentHour = dayjs().format("H");
 var toDoItems = [];
 
@@ -12,95 +12,86 @@ function updateTime() {
     currentDay.html(now);
 };
 
+//Dynamically updates time every second
 setInterval(updateTime, 1000);
 
-// Dynamically Renders Planner 
-
-function render() {
-
-    for (var i = 9; i < 18; i++) {
-      $(dayPlanner).append(`
-      <div class="time-row row" data-hour=${i}>
-        <div class="hour col-2 col-lg-1 d-flex justify-content-center align-items-center">${
-          i < 12 ? `${i} am` : i > 12 ? `${i - 12} pm` : "12 pm"
-        }</div>
-        <textarea
-        class="col -8 col-lg-10 description ${
-          i < currentHour ? "past" : i == currentHour ? "present" : "future"
-        }"
-        >${toDoItems[i] || ""}</textarea
-        ><button class="col-2 col-lg-1 btn btn-block d-flex justify-content-center align-items-center saveBtn" id="${i}">
-        <i class="fas fa-save"></i>
-        </button>
-        </div>
-        `);
-    }
-}
-
-render();
-
+// An array of objects
 function startSchedule(){
-
-$('.time-row').each(function(){
+  timeRow.each(function(){
   var thisRow = $(this);
-  var thisRowHr = Number((thisRow.attr("data-hour")));
-
+  var thisRowHr = parseInt(thisRow.attr("data-hour"));
   var todoObj = {
     hour: thisRowHr,
     text: "",
   }
-  console.log(todoObj);
   toDoItems.push(todoObj);
 });
 
-// Loop all rows, save to the local storage
-localStorage.setItem("toDos", JSON.stringify(toDoItems)); 
+// Retrieves Local Storage
+localStorage.setItem("todos", JSON.stringify(toDoItems)); 
 };
 
+// Function to Save currently selected row based on save icon location of row
 function saveTodo(){
-    var currentRow = parseInt($(this).parent().attr("data-hour")); //Target Curent Row Hour ID Make Integer
-    var taskUpdate = (($(this).parent()).children("textarea")).val(); //Target Text Area
-    for (var i = 0; i < toDoItems.length; i++){
-      if (toDoItems[i].hour == currentRow){
-       
-        toDoItems[i].text = taskUpdate;
-      }
-    }
-    localStorage.setItem("toDos", JSON.stringify(toDoItems));
-    console.log(currentRow);
-    console.log(taskUpdate);
-    // getTodos();
-    renderSchedule();
-
-}
-
-function renderSchedule(){
-  
-  toDoItems = localStorage.getItem("todos");
-  toDoItems = JSON.parse(toDoItems);
-    
-  for (var i = 0; i < toDoItems.length; i++){
-    var itemHour = toDoItems[i].hour;
-    var itemText = toDoItems[i].text; 
+var hourToUpdate = $(this).parent().attr("data-hour");
+var itemToAdd = (($(this).parent()).children("textarea")).val(); 
+for (var i = 0; i < toDoItems.length; i++){
+  if (toDoItems[i].hour == hourToUpdate){
    
-    $("[data-hour=" + itemHour + "]").children("textarea").val(itemText);
+    toDoItems[i].text = itemToAdd;
   }
 }
+localStorage.setItem("todos", JSON.stringify(toDoItems));
+// Re-Renders Todos
+renderSchedule();
+}
 
-$(document).ready(function(){
+//Changes the row style depending on time of day
+function setUpRows(){
+timeRow.each(function(){
+var thisRow = $(this);
+var thisRowHr = parseInt(thisRow.attr("data-hour"));
 
-if(!localStorage.getItem("toDos")){
-  //initialize the array of objects
-  startSchedule();
+// Adds class to row based on currenthour
+if (thisRowHr == currentHour) {
+  thisRow.addClass("present").removeClass("past future");
+}
+if (thisRowHr < currentHour) {
+  thisRow.addClass("past").removeClass("present future");
+}
+if (thisRowHr > currentHour) {
+  thisRow.addClass("future").removeClass("past present");
 }
 });
+}
 
+//Adds Todos to Page after retrieve items from Local Storage
+function renderSchedule(){
+
+toDoItems = localStorage.getItem("todos");
+toDoItems = JSON.parse(toDoItems);
+
+for (var i = 0; i < toDoItems.length; i++){
+  var itemHour = toDoItems[i].hour;
+  var itemText = toDoItems[i].text; 
+
+  $("[data-hour=" + itemHour + "]").children("textarea").val(itemText);
+}
+}
+
+//Runs function that checks time and marks past present and future classes for rows
 $(document).ready(function(){
+setUpRows();
 
-  if(!localStorage.getItem("toDos")){
-    //initialize the array of objects
-    startSchedule();
-  }
-  });
+if(!localStorage.getItem("todos")){
+  //Initializes first open of page
+startSchedule();
+} 
 
+//Adds all todo items to page
+renderSchedule();
+//when a todo item save button is clicked, save it
 dayPlanner.on("click", "button", saveTodo);
+
+});
+
