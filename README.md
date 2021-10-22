@@ -13,7 +13,7 @@ and which fields are in the past/future. Items saved to page are stored to the l
 
 ## Image
 
-![image of coding quiz ](assets/planner.png)
+![image of coding quiz ](assets/planner-img.png)
 
 ## Destination
 
